@@ -13,6 +13,9 @@ if "stage" not in st.session_state:
 if "last_submit_time" not in st.session_state:
     st.session_state.last_submit_time = None
 
+if "is_admin" not in st.session_state:
+    st.session_state.is_admin = False
+
 # ========== 第一階段：個人資料與風險聲明 ==========
 if st.session_state.stage == "intro":
     st.markdown("""
@@ -24,6 +27,10 @@ if st.session_state.stage == "intro":
         nickname = st.text_input("您的暱稱")
         contact_method = st.radio("請選擇聯絡方式：", ["LINE 通訊軟體 ID", "手機號碼"])
         contact_info = st.text_input(f"請輸入您的 {contact_method}")
+
+        admin_password = st.text_input("若您為管理者請輸入後台密碼（一般使用者請留空）", type="password")
+        if admin_password == "only4admin123":
+            st.session_state.is_admin = True
 
         st.markdown("---")
         agree1 = st.checkbox("✅ 我同意由第三方協助執行我所制定的交易邏輯")
@@ -134,16 +141,17 @@ elif st.session_state.stage == "strategy":
         st.json(payload)
 
 # ========== 📋 管理者後台介面 ==========
-st.markdown("---")
-st.subheader("📋 所有申請紀錄")
+if st.session_state.is_admin:
+    st.markdown("---")
+    st.subheader("📋 所有申請紀錄")
 
-if os.path.exists("submitted_strategies"):
-    files = sorted(os.listdir("submitted_strategies"), reverse=True)
-    for file in files:
-        if file.endswith(".json"):
-            with open(os.path.join("submitted_strategies", file), "r", encoding="utf-8") as f:
-                data = json.load(f)
-                with st.expander(f"📄 {file}"):
-                    st.json(data)
-else:
-    st.info("尚無任何申請紀錄。")
+    if os.path.exists("submitted_strategies"):
+        files = sorted(os.listdir("submitted_strategies"), reverse=True)
+        for file in files:
+            if file.endswith(".json"):
+                with open(os.path.join("submitted_strategies", file), "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                    with st.expander(f"📄 {file}"):
+                        st.json(data)
+    else:
+        st.info("尚無任何申請紀錄。")
