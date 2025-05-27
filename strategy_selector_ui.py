@@ -26,7 +26,9 @@ if st.session_state.stage == "intro":
     with st.form(key="user_info_form"):
         nickname = st.text_input("您的暱稱")
         contact_method = st.radio("請選擇聯絡方式：", ["LINE 通訊軟體 ID", "手機號碼"])
-        contact_info = st.text_input(f"請輸入您的 {contact_method}")
+
+        contact_placeholder = "請輸入正確資料"
+        contact_info = st.text_input(contact_placeholder)
 
         admin_password = st.text_input("若您為管理者請輸入後台密碼（一般使用者請留空）", type="password")
         if admin_password == "only4admin123":
@@ -65,7 +67,8 @@ elif st.session_state.stage == "strategy":
 
     st.markdown("""
         <h1 style='color:#1E90FF;'>📈 雲端託管交易策略申請</h1>
-        <h3>步驟二：策略參數設定</h3>
+                
+<h2 style='font-weight:bold;'>交易邏輯設定申請單</h2>
     """, unsafe_allow_html=True)
 
     account_type = st.selectbox("交易種類", ["標準合約", "永續合約", "現貨買賣"])
@@ -74,6 +77,11 @@ elif st.session_state.stage == "strategy":
     amount = st.number_input("每筆交易金額 (USDT)", min_value=1, value=10)
     take_profit = st.slider("止盈 %", 1, 100, 5)
     stop_loss = st.slider("止損 %", 1, 100, 10)
+
+    timeframe_choices = st.multiselect("📊 請選擇追蹤的 K 線週期（最多兩個）：", [
+        "1分K", "3分K", "5分K", "15分K", "30分K",
+        "60分K", "2小時K", "4小時K", "6小時K", "12小時K"
+    ], max_selections=2)
 
     st.markdown("---")
     st.subheader("📚 常用技術指標選擇（中英對照）")
@@ -126,6 +134,7 @@ elif st.session_state.stage == "strategy":
             "take_profit": take_profit,
             "stop_loss": stop_loss,
             "logic": logic_choices,
+            "timeframes": timeframe_choices,
             "timestamp": datetime.now().isoformat()
         }
 
@@ -138,7 +147,11 @@ elif st.session_state.stage == "strategy":
 
         st.success("🎉 策略已成功送出，我們將在 1-2 個工作日內審核並回覆您設定結果！")
         st.session_state.last_submit_time = datetime.now()
-        st.json(payload)
+        st.markdown("""
+            <div style='background-color:#f0f2f6; padding: 20px; border-radius: 8px; font-size: 16px;'>
+            ✅ 感謝您提交策略！我們已成功收到您的設定內容，會由專人儘快協助處理。
+            </div>
+        """, unsafe_allow_html=True)
 
 # ========== 📋 管理者後台介面 ==========
 if st.session_state.is_admin:
